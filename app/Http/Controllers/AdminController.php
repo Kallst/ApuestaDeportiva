@@ -42,7 +42,7 @@ class AdminController extends Controller
         return response()->json([
             'messsage' => 'Estas son las apuestas',
             'data' => $apuestas
-        ]);
+        ], 200);
     }
 
     public function ajustarSaldo(Request $request, int $id): JsonResponse
@@ -60,8 +60,8 @@ class AdminController extends Controller
 
         return response()->json([
             'message' => 'Saldo ajustado correctamente',
-            'saldo_actual' => $user->saldo
-        ]);
+            'data' => $user->saldo
+        ], 201);
     }
 
     public function simularResultado(Request $request): JsonResponse
@@ -105,7 +105,7 @@ class AdminController extends Controller
 
             return response()->json([
                 'message' => 'Resultado simulado correctamente'
-            ]);
+            ], 201);
 
         } catch (\Exception $e) {
 
