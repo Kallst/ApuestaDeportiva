@@ -3,6 +3,11 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use App\Http\Middleware\RoleMiddleware;
+use App\Http\Middleware\OtpMiddleware;
+use App\Http\Middleware\CheckSaldoMiddleware;
+use App\Http\Middleware\CheckEventoAbiertoMiddleware;
+
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
