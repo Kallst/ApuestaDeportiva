@@ -63,6 +63,25 @@ class AdminController extends Controller
             'data' => $user->saldo
         ], 200);
     }
+    public function crearCuota(Request $request): JsonResponse
+{
+    $request->validate([
+        'evento_id' => 'required|exists:eventos,id',
+        'tipo_apuesta' => 'required|string',
+        'cuota' => 'required|numeric|min:1'
+    ]);
+
+    $cuota = Cuota::create([
+        'evento_id' => $request->evento_id,
+        'tipo_apuesta' => $request->tipo_apuesta,
+        'cuota' => $request->cuota
+    ]);
+
+    return response()->json([
+        'message' => 'Cuota creada correctamente',
+        'data' => $cuota
+    ], 201);
+}
 
     public function simularResultado(Request $request): JsonResponse
     {
