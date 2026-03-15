@@ -5,17 +5,26 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Illuminate\Support\Facades\Auth;
+use App\Models\User;
 
 class OtpMiddleware
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  Closure(Request): (Response)  $next
-     */
     public function handle(Request $request, Closure $next): Response
     {
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user || $user->otp_code != $request->otp) {
+            return response()->json([
+                'message' => 'OTP inválido'
+            ], 401);
+        }
+
+        if (now()->greaterThan($user->otp_expiration)) {
+            return response()->json([
+                'message' => 'OTP expirado'
+            ], 401);
+        }
+
         return $next($request);
     }
 }
