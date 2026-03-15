@@ -3,7 +3,6 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Foundation\Configuration\Exceptions;
-use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\RoleMiddleware;
 use App\Http\Middleware\OtpMiddleware;
 use App\Http\Middleware\CheckSaldoMiddleware;
@@ -17,6 +16,8 @@ return Application::configure(basePath: dirname(__DIR__))
     )
 
     ->withMiddleware(function (Middleware $middleware) {
+
+        $middleware->redirectGuestsTo(fn () => null);
 
         $middleware->alias([
             'role' => RoleMiddleware::class,

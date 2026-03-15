@@ -78,28 +78,30 @@ class AdminController extends Controller
             $evento->estado = 'finalizado';
             $evento->save();
 
-            $apuestas = Apuesta::where('evento_id', $request->evento_id)->get();
 
-            foreach ($apuestas as $apuesta) {
-                if ($apuesta->tipo_apuesta === $request->resultado) {
+        $apuestas = Apuesta::where('evento_id', $request->event_id)->get();
 
-                    $ganancia = $apuesta->monto * $apuesta->cuota;
+        foreach ($apuestas as $apuesta) {
 
-                    $apuesta->estado = 'ganada';
-                    $apuesta->ganancia = $ganancia;
-                    $apuesta-> save();
+            if ($apuesta->tipo_apuesta === $request->resultado) {
 
-                    $usuario = User::find($apuesta->usuario_id);
-                    $usuario->saldo += $ganancia;
-                    $usuario->save();
+                $ganancia = $apuesta->monto * $apuesta->cuota;
 
-                } else {
+                $apuesta->estado = 'ganada';
+                $apuesta->ganancia = $ganancia;
+                $apuesta->save();
 
-                    $apuesta->estado = 'perdida';
-                    $apuesta->ganancia = 0;
-                    $apuesta->save();
-                }
+                $usuario = User::find($apuesta->usuario_id);
+                $usuario->saldo += $ganancia;
+                $usuario->save();
+
+            } else {
+
+                $apuesta->estado = 'perdida';
+                $apuesta->ganancia = 0;
+                $apuesta->save();
             }
+        }
 
             DB::commit();
 
