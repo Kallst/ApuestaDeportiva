@@ -65,21 +65,21 @@ class AdminController extends Controller
     }
 
     public function simularResultado(Request $request): JsonResponse
-    {
-        DB::beginTransaction();
+{
+    DB::beginTransaction();
 
-        try {
-            $resultado = Resultado::create([
-                'evento_id' => $request->evento_id,
-                'resultado' => $request->resultado
-            ]);
+    try {
 
-            $evento = Evento::findOrFail($request->evento_id);
-            $evento->estado = 'finalizado';
-            $evento->save();
+        $resultado = Resultado::create([
+            'evento_id' => $request->evento_id,
+            'resultado' => $request->resultado
+        ]);
 
+        $evento = Evento::findOrFail($request->evento_id);
+        $evento->estado = 'finalizado';
+        $evento->save();
 
-        $apuestas = Apuesta::where('evento_id', $request->event_id)->get();
+        $apuestas = Apuesta::where('evento_id', $request->evento_id)->get();
 
         foreach ($apuestas as $apuesta) {
 
@@ -91,7 +91,8 @@ class AdminController extends Controller
                 $apuesta->ganancia = $ganancia;
                 $apuesta->save();
 
-                $usuario = User::find($apuesta->usuario_id);
+                $usuario = User::find($apuesta->user_id);
+
                 $usuario->saldo += $ganancia;
                 $usuario->save();
 
@@ -103,20 +104,20 @@ class AdminController extends Controller
             }
         }
 
-            DB::commit();
+        DB::commit();
 
-            return response()->json([
-                'message' => 'Resultado simulado correctamente'
-            ], 201);
+        return response()->json([
+            'message' => 'Resultado simulado correctamente'
+        ], 201);
 
-        } catch (\Exception $e) {
+    } catch (\Exception $e) {
 
-            DB::rollBack();
+        DB::rollBack();
 
-            return response()->json([
-                'message' => 'Error al simular resultado',
-                'error' => $e->getMessage()
-            ], 500);
-        }
+        return response()->json([
+            'message' => 'Error al simular resultado',
+            'error' => $e->getMessage()
+        ], 500);
     }
+}
 }
