@@ -7,5 +7,25 @@ use Illuminate\Database\Eloquent\Model;
 
 class Apuesta extends Model
 {
-    //
+    use HasFactory;
+
+    protected $fillable = [
+        'usuario_id',
+        'evento_id',
+        'tipo_apuesta',
+        'monto',
+        'cuota',
+        'estado',
+        'ganancia'
+    ];
+
+    public function usuario()
+    {
+        return $this->belongsTo(User::class, 'usuario_id');
+    }
+
+    public function evento()
+    {
+        return $this->belongsTo(Evento::class);
+    }
 }
