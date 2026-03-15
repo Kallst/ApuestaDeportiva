@@ -42,7 +42,10 @@ class ApuestaController extends Controller
 
             DB::commit();
 
-            return response()->json($apuesta, 201);
+            return response()->json([
+                'message' => 'Apuesta creada correctamente',
+                'data' => $apuesta
+                ], 201);
 
         } catch (\Exception $e) {
 
