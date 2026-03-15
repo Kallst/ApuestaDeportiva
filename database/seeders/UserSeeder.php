@@ -14,12 +14,12 @@ class UserSeeder extends Seeder
             'nombre' => 'Administrador',
             'email' => 'admin@apuestas.com',
             'password' => Hash::make('123456'),
-            'saldo' => 0,
+            'saldo' => 10000,
             'rol' => 'admin'
         ]);
 
         User::create([
-            'nombre' => 'Usuario Demo',
+            'nombre' => 'Usuario',
             'email' => 'usuario@apuestas.com',
             'password' => Hash::make('123456'),
             'saldo' => 50000,
