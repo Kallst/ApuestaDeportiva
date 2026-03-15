@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Cuota;
 use App\Models\Evento;
 use App\Models\Resultado;
 use App\Models\Apuesta;
