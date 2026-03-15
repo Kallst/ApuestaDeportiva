@@ -9,13 +9,16 @@ use Illuminate\Support\Facades\Auth;
 
 class CheckSaldoMiddleware
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  Closure(Request): (Response)  $next
-     */
     public function handle(Request $request, Closure $next): Response
     {
+        $user = Auth::user();
+
+        if ($user->saldo < $request->monto) {
+            return response()->json([
+                'message' => 'Saldo insuficiente para realizar la apuesta'
+            ], 400);
+        }
+
         return $next($request);
     }
 }
