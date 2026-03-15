@@ -40,4 +40,6 @@ Route::middleware(['auth:api', 'role:admin'])->prefix('admin')->group(function (
 
     Route::post('/usuarios/{id}/saldo', [AdminController::class, 'ajustarSaldo']);
 
+    Route::post('/cuotas', [AdminController::class, 'crearCuota']);
+
 });
