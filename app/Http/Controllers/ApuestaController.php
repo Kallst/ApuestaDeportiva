@@ -59,21 +59,21 @@ class ApuestaController extends Controller
     }
 
     public function misApuestas(): JsonResponse
-{
-    $usuario = Auth::user();
+    {
+        $usuario = Auth::user();
 
-    if (!$usuario) {
-        return response()->json([
-            'message' => 'Usuario no autenticado'
-        ], 401);
+        if (!$usuario) {
+            return response()->json([
+                'message' => 'Usuario no autenticado'
+            ], 401);
+        }
+
+        $apuestas = Apuesta::where('usuario_id', $usuario->id)
+            ->with('evento')
+            ->get();
+
+        return response()->json($apuestas);
     }
-
-    $apuestas = Apuesta::where('usuario_id', $usuario->id)
-        ->with('evento')
-        ->get();
-
-    return response()->json($apuestas);
-}
     public function cobrar(int $id): JsonResponse
     {
         $usuario = Auth::user();
