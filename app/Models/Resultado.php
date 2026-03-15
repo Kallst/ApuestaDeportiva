@@ -7,5 +7,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class Resultado extends Model
 {
-    //
+    use HasFactory;
+
+    protected $fillable = [
+        'evento_id',
+        'resultado'
+    ];
+
+    public function evento()
+    {
+        return $this->belongsTo(Evento::class);
+    }
 }
