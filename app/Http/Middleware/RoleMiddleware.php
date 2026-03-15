@@ -9,13 +9,16 @@ use Illuminate\Support\Facades\Auth;
 
 class RoleMiddleware
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  Closure(Request): (Response)  $next
-     */
-    public function handle(Request $request, Closure $next): Response
+    public function handle(Request $request, Closure $next, string $role): Response
     {
+        $user = Auth::user();
+
+        if (!$user || $user->rol !== $role) {
+            return response()->json([
+                'message' => 'Acceso no autorizado'
+            ], 403);
+        }
+
         return $next($request);
     }
 }
