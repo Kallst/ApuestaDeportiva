@@ -23,7 +23,7 @@ class AdminController extends Controller
         ]);
 
         return response()->json([
-            'message' => 'evento creado correctamente',
+            'message' => 'Evento creado correctamente',
             'data' => $evento
         ], 201);
     }
@@ -32,92 +32,95 @@ class AdminController extends Controller
     {
         $apuestas = Apuesta::with(['usuario', 'evento'])->get();
 
-        if ($apuestas == null){
+        if ($apuestas->isEmpty()) {
             return response()->json([
                 'message'=> 'No hay apuestas en este momento',
-                'data'=> null
-            ], 404);
+                'data'=> []
+            ], 200);
         }
 
         return response()->json([
-            'messsage' => 'Estas son las apuestas',
+            'message' => 'Estas son las apuestas',
             'data' => $apuestas
         ], 200);
     }
 
     public function ajustarSaldo(Request $request, int $id): JsonResponse
     {
-        if ($request -> monto < 0){
+        if ($request->monto < 0){
             return response()->json([
-                'message'=> 'No puede agregar un monto negativo',
-                'data'=> $request -> monto
+                'message'=> 'No puede agregar un monto negativo'
             ], 422);
         }
 
         $user = User::findOrFail($id);
-        $user -> saldo += $request->monto;
-        $user -> save();
+
+        $user->saldo += $request->monto;
+        $user->save();
 
         return response()->json([
             'message' => 'Saldo ajustado correctamente',
             'data' => $user->saldo
-        ], 201);
+        ], 200);
     }
 
     public function simularResultado(Request $request): JsonResponse
-{
-    DB::beginTransaction();
+    {
+        DB::beginTransaction();
 
-    try {
+        try {
 
-        $resultado = Resultado::create([
-            'evento_id' => $request->evento_id,
-            'resultado' => $request->resultado
-        ]);
+            $resultadoExistente = Resultado::where('evento_id', $request->evento_id)->first();
 
-        $evento = Evento::findOrFail($request->evento_id);
-        $evento->estado = 'finalizado';
-        $evento->save();
-
-        $apuestas = Apuesta::where('evento_id', $request->evento_id)->get();
-
-        foreach ($apuestas as $apuesta) {
-
-            if ($apuesta->tipo_apuesta === $request->resultado) {
-
-                $ganancia = $apuesta->monto * $apuesta->cuota;
-
-                $apuesta->estado = 'ganada';
-                $apuesta->ganancia = $ganancia;
-                $apuesta->save();
-
-                $usuario = User::find($apuesta->user_id);
-
-                $usuario->saldo += $ganancia;
-                $usuario->save();
-
-            } else {
-
-                $apuesta->estado = 'perdida';
-                $apuesta->ganancia = 0;
-                $apuesta->save();
+            if ($resultadoExistente) {
+                return response()->json([
+                    'message' => 'Este evento ya tiene un resultado registrado'
+                ], 400);
             }
+
+            Resultado::create([
+                'evento_id' => $request->evento_id,
+                'resultado' => $request->resultado
+            ]);
+
+            $evento = Evento::findOrFail($request->evento_id);
+            $evento->estado = 'finalizado';
+            $evento->save();
+
+            $apuestas = Apuesta::where('evento_id', $request->evento_id)->get();
+
+            foreach ($apuestas as $apuesta) {
+
+                if ($apuesta->tipo_apuesta === $request->resultado) {
+
+                    $ganancia = $apuesta->monto * $apuesta->cuota;
+
+                    $apuesta->estado = 'ganada';
+                    $apuesta->ganancia = $ganancia;
+                    $apuesta->save();
+
+                } else {
+
+                    $apuesta->estado = 'perdida';
+                    $apuesta->ganancia = 0;
+                    $apuesta->save();
+                }
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Resultado simulado correctamente'
+            ], 201);
+
+        } catch (\Exception $e) {
+
+            DB::rollBack();
+
+            return response()->json([
+                'message' => 'Error al simular resultado',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        DB::commit();
-
-        return response()->json([
-            'message' => 'Resultado simulado correctamente'
-        ], 201);
-
-    } catch (\Exception $e) {
-
-        DB::rollBack();
-
-        return response()->json([
-            'message' => 'Error al simular resultado',
-            'error' => $e->getMessage()
-        ], 500);
     }
-}
 }
