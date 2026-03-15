@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Apuesta;
 use App\Models\Evento;
 use App\Models\Cuota;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -21,11 +20,21 @@ class ApuestaController extends Controller
 
             $usuario = Auth::user();
 
+            if (!$usuario) {
+                return response()->json([
+                    'message' => 'Usuario no autenticado'
+                ], 401);
+            }
+
             $cuota = Cuota::where('evento_id', $request->evento_id)
                 ->where('tipo_apuesta', $request->tipo_apuesta)
                 ->firstOrFail();
 
-            $ganancia = $request->monto * $cuota->cuota;
+            if ($usuario->saldo < $request->monto) {
+                return response()->json([
+                    'message' => 'Saldo insuficiente'
+                ], 400);
+            }
 
             $apuesta = Apuesta::create([
                 'usuario_id' => $usuario->id,
@@ -34,7 +43,7 @@ class ApuestaController extends Controller
                 'monto' => $request->monto,
                 'cuota' => $cuota->cuota,
                 'estado' => 'pendiente',
-                'ganancia' => $ganancia
+                'ganancia' => 0
             ]);
 
             $usuario->saldo -= $request->monto;
@@ -45,7 +54,7 @@ class ApuestaController extends Controller
             return response()->json([
                 'message' => 'Apuesta creada correctamente',
                 'data' => $apuesta
-                ], 201);
+            ], 201);
 
         } catch (\Exception $e) {
 
@@ -72,11 +81,21 @@ class ApuestaController extends Controller
             ->with('evento')
             ->get();
 
-        return response()->json($apuestas);
+        return response()->json([
+            'message' => 'Estas son tus apuestas',
+            'data' => $apuestas
+        ], 200);
     }
+
     public function cobrar(int $id): JsonResponse
     {
         $usuario = Auth::user();
+
+        if (!$usuario) {
+            return response()->json([
+                'message' => 'Usuario no autenticado'
+            ], 401);
+        }
 
         $apuesta = Apuesta::where('id', $id)
             ->where('usuario_id', $usuario->id)
