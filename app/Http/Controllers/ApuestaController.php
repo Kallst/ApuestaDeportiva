@@ -86,26 +86,37 @@ public function apostar(Request $request): JsonResponse
         ], 500);
     }
 }
+public function misApuestas(): JsonResponse
+{
+    $usuario = auth()->user();
 
-    public function misApuestas(): JsonResponse
-    {
-        $usuario = Auth::user();
+    if (!$usuario) {
+        return response()->json([
+            'message' => 'Usuario no autenticado'
+        ], 401);
+    }
 
-        if (!$usuario) {
-            return response()->json([
-                'message' => 'Usuario no autenticado'
-            ], 401);
-        }
+    try {
 
-        $apuestas = Apuesta::where('usuario_id', $usuario->id)
-            ->with('evento')
+        $apuestas = Apuesta::with('evento')
+            ->where('usuario_id', $usuario->id)
+            ->latest()
             ->get();
 
         return response()->json([
             'message' => 'Estas son tus apuestas',
+            'total_apuestas' => $apuestas->count(),
             'data' => $apuestas
         ], 200);
+
+    } catch (\Throwable $e) {
+
+        return response()->json([
+            'message' => 'Error al obtener las apuestas',
+            'error' => $e->getMessage()
+        ], 500);
     }
+}
 
     public function cobrar(int $id): JsonResponse
     {
